@@ -1,0 +1,215 @@
+
+database for Business_ic
+
+
+-- Create Users table
+CREATE TABLE Users (
+  user_id INT NOT NULL AUTO_INCREMENT,
+  username VARCHAR(50) NOT NULL,
+  password VARCHAR(100) NOT NULL,
+  email VARCHAR(100) NOT NULL UNIQUE,
+  first_name VARCHAR(50) NOT NULL,
+  last_name VARCHAR(50) NOT NULL,
+  address VARCHAR(100) DEFAULT NULL,
+  phone_number VARCHAR(20) DEFAULT NULL,
+  job_title VARCHAR(100) NOT NULL,
+  rank VARCHAR(25) DEFAULT 'mustaqil',
+  image VARCHAR(255) NOT NULL,
+  id_image VARCHAR(255) DEFAULT NULL,
+  personal_description TEXT DEFAULT NULL,
+  completed_projects INT DEFAULT 0,
+  evaluation FLOAT DEFAULT 0.0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id)
+);
+
+-- Create Jobs table
+CREATE TABLE Jobs (
+  job_id INT NOT NULL AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  title VARCHAR(100) NOT NULL,
+  description TEXT NOT NULL,
+  price_min INT NOT NULL,
+  price_max INT NOT NULL,
+  categories VARCHAR(50) NOT NULL,
+  delivery_time INT NOT NULL,
+  status BOOLEAN NOT NULL DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (job_id),
+  FORE IGN KEY (user_id) REFERENCES Users(user_id)
+);
+
+-- Create Jobs_file table
+CREATE TABLE Jobs_file (
+  file_id INT NOT NULL AUTO_INCREMENT,
+  job_id INT NOT NULL,
+  file_name VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (file_id),
+  FOREIGN KEY (job_id) REFERENCES Jobs(job_id) ON DELETE CASCADE
+);
+
+-- Create Categories table
+CREATE TABLE Categories (
+  category_id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(50) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (category_id),
+  UNIQUE KEY (name)
+);
+
+جدول العلاقه متعدد لمتعدد بين المستخدم والفئات :
+CREATE TABLE category_user (
+  id INT NOT NULL AUTO_INCREMENT,
+  category_id INT NOT NULL,
+  user_id INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY (category_id, user_id),
+  FOREIGN KEY (category_id) REFERENCES Categories(category_id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+
+-- Create Gallery table
+CREATE TABLE Gallery (
+  gallery_id INT NOT NULL AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  title VARCHAR(100) NOT NULL,
+  description TEXT NOT NULL,
+  minimized_picture VARCHAR(255),
+  completion_date DATE,
+  link VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (gallery_id),
+  FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
+
+-- Create Gallery_image table
+CREATE TABLE Gallery_image (
+  image_id INT NOT NULL AUTO_INCREMENT,
+  gallery_id INT NOT NULL,
+  image VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (image_id),
+  FOREIGN KEY (gallery_id) REFERENCES Gallery(gallery_id)
+);
+
+-- Create Bids table
+CREATE TABLE Bids (
+  bid_id INT NOT NULL AUTO_INCREMENT,
+  job_id INT NOT NULL,
+  user_id INT NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  description TEXT DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (bid_id),
+  FOREIGN KEY (job_id) REFERENCES Jobs(job_id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+-- Create Reviews table
+CREATE TABLE Reviews (
+  review_id INT NOT NULL AUTO_INCREMENT,
+  job_id INT NOT NULL,
+  user_id INT NOT NULL,
+  rating INT NOT NULL,
+  comment TEXT DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (review_id),
+  FOREIGN KEY (job_id) REFERENCES Jobs(job_id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+);
+
+-- Create Job_notifications table
+CREATE TABLE Job_notifications (
+  notification_id INT NOT NULL AUTO_INCREMENT,
+  job_id INT NOT NULL,
+  user_id INT NOT NULL,
+  message TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (notification_id),
+  FOREIGN KEY (job_id) REFERENCES Jobs(job_id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+-- Create Admins table
+CREATE TABLE Admins (
+  admin_id INT NOT NULL AUTO_INCREMENT,
+  username VARCHAR(50) NOT NULL,
+  password VARCHAR(100) NOT NULL,
+  email VARCHAR(100) NOT NULL UNIQUE,
+  first_name VARCHAR(50) NOT NULL,
+  last_name VARCHAR(50) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (admin_id)
+);
+
+-- Create Admin_notifications table
+CREATE TABLE Admin_notifications (
+  notification_id INT NOT NULL AUTO_INCREMENT,
+  admin_id INT NOT NULL,
+  user_id INT NOT NULL,
+  message TEXT NOT NULL,
+  chat_name TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (notification_id),
+  FOREIGN KEY (admin_id) REFERENCES Admins(admin_id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+-- Create Chats table
+CREATE TABLE Chats (
+  chat_id INT NOT NULL AUTO_INCREMENT,
+  sender_id INT NOT NULL,
+  receiver_id INT NOT NULL,
+  message TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (chat_id),
+  FOREIGN KEY (sender_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+  FOREIGN KEY (receiver_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+
+-- Create Group_chat table
+CREATE TABLE Group_chat (
+  chat_id INT NOT NULL AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  message TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (chat_id),
+  FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+
+-- Create Wallet table
+CREATE TABLE Wallet (
+  wallet_id INT NOT NULL AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (wallet_id),
+  FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+-- Create Payment table
+CREATE TABLE Payment (
+  payment_id INT NOT NULL AUTO_INCREMENT,
+  job_id INT NOT NULL,
+  user_id INT NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (wallet_id),
+  FOREIGN KEY (job_id) REFERENCES Jobs(job_id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
